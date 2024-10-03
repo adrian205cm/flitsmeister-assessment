@@ -6,7 +6,6 @@ import { WiDayCloudy, WiDayFog, WiDayLightning, WiDayRain, WiDaySnow, WiDaySprin
 const API_KEY = 'd0595002b3c37b445fd78bee61c06fa8';
 
 function getWeatherIcon(weathertype) {
-    console.log(weathertype);
     if (weathertype == "Thunder") { return <WiDayRain></WiDayRain> } 
     else if (weathertype == "Clouds") { return <WiDayCloudy></WiDayCloudy> } 
     else if (weathertype == "Rain") { return <WiDayRain></WiDayRain> }
