@@ -1,35 +1,77 @@
 import React, { useState, useEffect } from 'react';
 import WeatherCard from './components/WeatherCard';
+import WeatherDetails from './components/WeatherDetails';
+import axios from 'axios';
+const API_KEY = 'd0595002b3c37b445fd78bee61c06fa8';
 
 function App() {
   const [cities, setCities] = useState(JSON.parse(localStorage.getItem('cities')) || []);
   const [newCity, setNewCity] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [citiesWeather, setCitiesWeather] = useState([]);
 
-  useEffect(() => {
-    const storedCities = JSON.parse(localStorage.getItem('cities') || '[]');
-    setCities(storedCities);
+  
+  // EFFECTS
+  useEffect(() => { // FETCH storedcities weatherdata
+    const loadCities = async () => {
+      const storedCities = JSON.parse(localStorage.getItem('cities') || '[]');
+      setCities(storedCities);
+
+      const weatherPromises = storedCities.map(city => 
+        fetchWeatherData(city)
+      );
+      const weatherData = await Promise.all(weatherPromises);
+      setCitiesWeather(weatherData.filter(data => data !== null));
+      setLoading(false);
+    };
+    loadCities();
   }, []);
 
-  useEffect(() => {
+  
+  useEffect(() => { // set stored cities to localstorage
     localStorage.setItem('cities', JSON.stringify(cities));
-  }, [cities]);
+  }, [cities, loading]);
 
 
-
-  const addCity = (e) => {
-    if (newCity && !cities.includes(newCity)) {
-      setCities([...cities, newCity]);
-      setNewCity('');
-    }
+  // HANDLERS
+  const addCity = async(e) => {
     e.preventDefault();
+    if (newCity && !cities.includes(newCity)) {
+      const weatherData = await fetchWeatherData(newCity);
+      if (weatherData) {
+        setCities([...cities, newCity]);
+        setNewCity('');
+        console.log(weatherData);
+        setCitiesWeather([...citiesWeather, weatherData]);
+      } else {
+        alert('Invalid location');
+      }
+    }
   };
 
   const removeCity = (cityToRemove) => {
     setCities(cities.filter(city => city !== cityToRemove));
+    setCitiesWeather(citiesWeather.filter(city => city.name !== cityToRemove));
   };
+
   const selectCity = (cityToSelect) => {
     setSelectedCity(cityToSelect);
+  };
+
+  const fetchWeatherData = async (cityName) => {
+    try {
+      const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric`);
+      return {
+        name: cityName,
+        temp: response.data.main.temp,
+        description: response.data.weather[0].description,
+        fulldata: response.data
+      };
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+      return null;
+    }
   };
 
   return (
@@ -67,7 +109,7 @@ function App() {
                 <WeatherCard
                   key={index}
                   city={city}
-                  weatherdata={city.fulldata}
+                  weatherdata={citiesWeather.filter(cityname => cityname.name === city)[0]}
                   onRemove={() => removeCity(city)}
                   onSelect={() => selectCity(city)}
                 />
@@ -75,7 +117,10 @@ function App() {
             </div>
           </div>
           <div className="lg:w-1/2 bg-blue-600 text-white flex flex-col">
-              {selectedCity}
+              {loading 
+                ? <p>Loading</p> 
+                : <WeatherDetails selectedcity={selectedCity} weatherdata={citiesWeather.filter(city => city.name === selectedCity)[0]} />
+              }
           </div>
         </div>
 
