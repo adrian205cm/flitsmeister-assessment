@@ -6,17 +6,17 @@ import { WiDayCloudy, WiDayFog, WiDayLightning, WiDayRain, WiDaySnow, WiDaySprin
 const API_KEY = 'd0595002b3c37b445fd78bee61c06fa8';
 
 function getWeatherIcon(weathertype) {
-  if (weathertype == "Thunder") { return <WiDayRain></WiDayRain> }
-  else if (weathertype == "Clouds") { return <WiDayCloudy></WiDayCloudy> }
-  else if (weathertype == "Rain") { return <WiDayRain></WiDayRain> }
-  else if (weathertype == "Snow") { return <WiDaySnow></WiDaySnow> }
-  else if (weathertype == "Atmosphere") { return <WiDayFog></WiDayFog> }
-  else if (weathertype == "Clear") { return <WiDaySunny></WiDaySunny> }
-  else if (weathertype == "Clouds") { return <WiDayCloudy></WiDayCloudy> }
+  if (weathertype === "Thunder") { return <WiDayLightning></WiDayLightning> }
+  else if (weathertype === "Clouds") { return <WiDayCloudy></WiDayCloudy> }
+  else if (weathertype === "Rain") { return <WiDayRain></WiDayRain> }
+  else if (weathertype === "Snow") { return <WiDaySnow></WiDaySnow> }
+  else if (weathertype === "Atmosphere") { return <WiDayFog></WiDayFog> }
+  else if (weathertype === "Clear") { return <WiDaySunny></WiDaySunny> }
+  else if (weathertype === "Clouds") { return <WiDayCloudy></WiDayCloudy> }
   else return <WiDaySprinkle></WiDaySprinkle>
 }
 
-const WeatherCard = ({ city, onRemove }) => {
+const WeatherCard = ({ city, onRemove, onSelect }) => {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -69,47 +69,33 @@ const WeatherCard = ({ city, onRemove }) => {
 
   return (
     <div
-      className="card relative group min-w-sm max-w-sm border border-gray-100 transition-shadow shadow-lg hover:shadow-shadow-xl w-full bg-flitsmeister text-purple-50 rounded-md">
+      className="relative group  bg-gray-100 has-[:checked]:bg-blue-100 px-6 py-4 border-b border-gray-300">
       <button
         onClick={onRemove}
         className="absolute right-0 bg-red-500 text-white px-2 m-3 rounded transition opacity-0 group-hover:opacity-100"
       >
         Remove
       </button>
-      <h2 className="text-md mb-2 px-4 pt-4">
-        <div className="flex justify-between">
-          <div className="badge relative top-0">
-            <span className="mt-2 py-1 h-12px text-md font-semibold w-12px  rounded right-1 bottom-1 px-4">{city}</span>
-          </div>
-          <span className="text-lg font-bold ">
-            {weather.localtime.getHours()}:{weather.localtime.getMinutes().toString().padStart(2, '0')}
-          </span>
-        </div>
-      </h2>
 
-      <div className="flex items-center p-4">
-        <div className="flex justify-center items-center w-96 h-10 text-8xl">
+      <label className="flex items-center w-full ml-2 cursor-pointer has-[:checked]:bg-indigo-200">
+        <input 
+          type="radio" 
+          name="selectedcity" 
+          value={city} 
+          onChange={onSelect}
+        />
+        <div className="flex flex-col pl-2">
+          <h2 className="font-medium text-sm">{city}, {weather.country}</h2>
+          <h3 className="text-gray-500 text-sm">{weather.temp}°</h3>
+        </div>
+
+        <div className="flex ml-auto justify-center items-center text-8xl text-gray-400">
           {getWeatherIcon(weather.weathermain)}
         </div>
-      </div>
-      <div className="text-md pt-4 pb-4 px-4">
-        <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <span className="flex space-x-2 items-center">
-              <WiStrongWind></WiStrongWind>
-              <span> {weather.windspeed}km/h </span>
-            </span>
-            <span className="flex space-x-2 items-center">
-              <WiHumidity></WiHumidity>
-              <span> {weather.humidity}%</span>
-            </span>
-          </div>
-          <div>
-            <h1 className="text-6xl"> {weather.temp}° </h1>
-          </div>
-        </div>
-      </div>
+      </label>
     </div>
+
+      
   );
 };
 
